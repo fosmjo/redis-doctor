@@ -31,7 +31,7 @@ func (v *CSVVisitor) VisitBigKey(key *doctor.BigKey) error {
 	return v.w.Write(a)
 }
 
-func (cv *CSVVisitor) VisitSlowLog(log *doctor.SlowLog) error {
+func (v *CSVVisitor) VisitSlowLog(log *doctor.SlowLog) error {
 	a := []string{
 		strconv.FormatInt(log.ID, 10),
 		log.Time.Local().Format(time.DateTime),
@@ -40,9 +40,9 @@ func (cv *CSVVisitor) VisitSlowLog(log *doctor.SlowLog) error {
 		log.ClientAddr,
 		log.ClientName,
 	}
-	return cv.w.Write(a)
+	return v.w.Write(a)
 }
 
-func (cv *CSVVisitor) Flush() {
-	cv.w.Flush()
+func (v *CSVVisitor) Flush() {
+	v.w.Flush()
 }

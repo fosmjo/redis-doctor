@@ -42,7 +42,7 @@ func (d *Doctor) slowlog(ctx context.Context, count int) error {
 	}
 
 	for _, log := range logs {
-		err := (*SlowLog)(&log).Accept(d.outputer)
+		err := (*SlowLog)(&log).Accept(d.outputer) // nolint: gosec
 		if err != nil {
 			return err
 		}

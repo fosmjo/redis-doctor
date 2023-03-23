@@ -1,0 +1,23 @@
+{
+    "editor.rulers": [
+        100,
+        120
+    ],
+    "go.inferGopath": false,
+    "go.useLanguageServer": true,
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [
+        "--fast"
+    ],
+    "go.addTags": {
+        "transform": "camelcase",
+        "options": ""
+    },
+    "gopls": {
+        "build.buildFlags": ["-tags=integration"],
+        "formatting.gofumpt": true,
+    },
+    "go.toolsEnvVars": {
+        "GOFLAGS": "-tags=integration"
+    }
+}

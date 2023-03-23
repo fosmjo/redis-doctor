@@ -63,11 +63,17 @@ var rootCmd = &cobra.Command{
 	Use:   "redis-doctor",
 	Short: "diagnose redis problems.",
 	Long:  `redis-doctor is a cli tool for diagnosing redis problems, such as hotkey, bigkey, slowlog, etc.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		var outputer doctor.Visitor
 		switch _options.format {
 		case "json":
 			outputer = visitors.NewJSONVisitor(os.Stdout)
+		case "xml":
+			v := visitors.NewXMLVisitor(os.Stdout)
+			defer func() {
+				err = v.Close()
+			}()
+			outputer = v
 		default: // csv
 			v := visitors.NewCSVVisitor(os.Stdout)
 			defer v.Flush()
@@ -102,12 +108,21 @@ func init() {
 	rootCmd.Flags().IntVarP(&_options.db, "db", "n", 0, "redis database (default 0)")
 	rootCmd.Flags().StringVarP(&_options.user, "user", "u", "", "redis username")
 	rootCmd.Flags().StringVarP(&_options.password, "pass", "", "", "redis password")
-	rootCmd.Flags().StringVarP(&_options.symptom, "symptom", "s", "", "symptom to diagnose (required, oneof: bigkey, hotkey, slowlog)")
+	rootCmd.Flags().StringVarP(
+		&_options.symptom, "symptom", "s", "",
+		"symptom to diagnose (required, oneof: bigkey, hotkey, slowlog)",
+	)
 	err := rootCmd.MarkFlagRequired("symptom")
 	if err != nil {
 		panic(err)
 	}
-	rootCmd.Flags().StringVarP(&_options.pattern, "pattern", "", "*", "keys pattern when using the --bigkeys or --hotkey options")
+	rootCmd.Flags().StringVarP(
+		&_options.pattern, "pattern", "", "*",
+		"keys pattern when using the --bigkeys or --hotkey options",
+	)
 	rootCmd.Flags().IntVarP(&_options.count, "count", "c", 10, "specify the number of returned entries")
-	rootCmd.Flags().StringVarP(&_options.format, "format", "f", "csv", "output format (oneof: csv, json)")
+	rootCmd.Flags().StringVarP(
+		&_options.format, "format", "f", "csv",
+		"output format (oneof: csv, json, xml)",
+	)
 }
