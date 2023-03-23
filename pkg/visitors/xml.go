@@ -22,7 +22,7 @@ func NewXMLVisitor(w io.Writer) *XMLVisitor {
 func (v *XMLVisitor) VisitBigKey(key *doctor.BigKey) error {
 	t := struct {
 		*doctor.BigKey
-		XMLName struct{} `xml:"slowlog"`
+		XMLName struct{} `xml:"bigkey"`
 	}{BigKey: key}
 
 	return v.visit(&t)
