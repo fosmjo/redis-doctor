@@ -14,17 +14,17 @@ type Visitor interface {
 }
 
 type BigKey struct {
-	Key              string `json:"key" xml:"key"`
-	Type             string `json:"type" xml:"type"`
-	Encoding         string `json:"encoding" xml:"encoding"`
-	SerializedLength int64  `json:"serializedLength" xml:"serializedLength"`
+	Key              string `json:"key,omitempty" xml:"key,omitempty"`
+	Type             string `json:"type,omitempty" xml:"type,omitempty"`
+	Encoding         string `json:"encoding,omitempty" xml:"encoding,omitempty"`
+	SerializedLength int64  `json:"serializedLength,omitempty" xml:"serializedLength,omitempty"`
 	// Number of elements of the key, acquired by following commands:
 	//   STRLEN <string>
 	//   HLEN <hash>
 	//   LLEN <list>
 	//   SCARD <set>
 	//   ZCARD <sorted set>
-	Cardinality int64 `json:"cardinality" xml:"cardinality"`
+	Cardinality int64 `json:"cardinality,omitempty" xml:"cardinality,omitempty"`
 }
 
 func (bk *BigKey) Accept(v Visitor) error {

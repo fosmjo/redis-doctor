@@ -40,10 +40,14 @@ type options struct {
 	user     string
 	password string
 
-	symptom string
-	pattern string
-	format  string
-	count   int
+	symptom     string
+	pattern     string
+	_type       string
+	length      int64
+	cardinality int64
+	batch       int
+	limit       int
+	format      string
 }
 
 func (o *options) toRedisUniversalOPtions() *redis.UniversalOptions {
@@ -70,9 +74,7 @@ var rootCmd = &cobra.Command{
 			outputer = visitors.NewJSONVisitor(os.Stdout)
 		case "xml":
 			v := visitors.NewXMLVisitor(os.Stdout)
-			defer func() {
-				err = v.Close()
-			}()
+			defer func() { err = v.Close() }()
 			outputer = v
 		default: // csv
 			v := visitors.NewCSVVisitor(os.Stdout)
@@ -86,8 +88,12 @@ var rootCmd = &cobra.Command{
 			context.Background(),
 			_options.symptom,
 			doctor.Options{
-				Pattern: _options.pattern,
-				Count:   _options.count,
+				Pattern:     _options.pattern,
+				Type:        _options._type,
+				Length:      _options.length,
+				Cardinality: _options.cardinality,
+				Batch:       _options.batch,
+				Limit:       _options.limit,
 			},
 		)
 	},
@@ -120,7 +126,20 @@ func init() {
 		&_options.pattern, "pattern", "", "*",
 		"keys pattern when using the --bigkeys or --hotkey options",
 	)
-	rootCmd.Flags().IntVarP(&_options.count, "count", "c", 10, "specify the number of returned entries")
+	rootCmd.Flags().StringVarP(
+		&_options._type, "type", "t", "",
+		"redis data type (oneof: string, list, hash, set, zset)",
+	)
+	rootCmd.Flags().Int64VarP(
+		&_options.length, "length", "l", 0,
+		"serialized length of a key, used to filter bigkey (default 0)",
+	)
+	rootCmd.Flags().Int64VarP(
+		&_options.cardinality, "cardinality", "c", 0,
+		"the number of elements of a key, used to filter bigkey (default 0)",
+	)
+	rootCmd.Flags().IntVarP(&_options.batch, "batch", "b", 10, "the batch size when using the scan command")
+	rootCmd.Flags().IntVarP(&_options.limit, "limit", "", 10, "the number of returned entries")
 	rootCmd.Flags().StringVarP(
 		&_options.format, "format", "f", "csv",
 		"output format (oneof: csv, json, xml)",
