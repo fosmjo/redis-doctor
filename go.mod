@@ -6,7 +6,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/spf13/cobra v1.6.1
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 )
 
 require (
