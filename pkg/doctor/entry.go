@@ -10,6 +10,7 @@ type Entry interface {
 
 type Visitor interface {
 	VisitBigKey(key *BigKey) error
+	VisitHotKey(key *HotKey) error
 	VisitSlowLog(log *SlowLog) error
 }
 
@@ -29,6 +30,16 @@ type BigKey struct {
 
 func (bk *BigKey) Accept(v Visitor) error {
 	return v.VisitBigKey(bk)
+}
+
+type HotKey struct {
+	Key       string `json:"key,omitempty" xml:"key,omitempty"`
+	Type      string `json:"type,omitempty" xml:"type,omitempty"`
+	Frequency int64  `json:"frequency,omitempty" xml:"frequency,omitempty"`
+}
+
+func (hk *HotKey) Accept(v Visitor) error {
+	return v.VisitHotKey(hk)
 }
 
 // Copied from https://pkg.go.dev/github.com/redis/go-redis/v9@v9.0.2#SlowLog

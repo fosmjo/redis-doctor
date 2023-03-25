@@ -45,6 +45,7 @@ type options struct {
 	_type       string
 	length      int64
 	cardinality int64
+	frequency   int64
 	batch       int
 	limit       int
 	format      string
@@ -92,6 +93,7 @@ var rootCmd = &cobra.Command{
 				Type:        _opts._type,
 				Length:      _opts.length,
 				Cardinality: _opts.cardinality,
+				Frequency:   _opts.frequency,
 				Batch:       _opts.batch,
 				Limit:       _opts.limit,
 			},
@@ -137,6 +139,10 @@ func init() {
 	rootCmd.Flags().Int64VarP(
 		&_opts.cardinality, "cardinality", "c", 0,
 		"the number of elements of a key, used to filter bigkey (default 0)",
+	)
+	rootCmd.Flags().Int64VarP(
+		&_opts.frequency, "frequency", "", 0,
+		"the logarithmic access frequency counter of a key, used to filter hotkey (default 0)",
 	)
 	rootCmd.Flags().IntVarP(&_opts.batch, "batch", "b", 10, "the batch size when using the scan command")
 	rootCmd.Flags().IntVarP(&_opts.limit, "limit", "", 10, "the number of returned entries")

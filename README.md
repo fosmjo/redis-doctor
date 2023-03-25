@@ -22,6 +22,7 @@ Flags:
   -c, --cardinality int   the number of elements of a key, used to filter bigkey (default 0)
   -n, --db int            redis database (default 0)
   -f, --format string     output format (oneof: csv, json, xml) (default "csv")
+      --frequency int     the logarithmic access frequency counter of a key, used to filter hotkey (default 0)
   -h, --help              help for redis-doctor
       --host string       redis server host (default "127.0.0.1")
   -l, --length int        serialized length of a key, used to filter bigkey (default 0)

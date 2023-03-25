@@ -28,6 +28,15 @@ func (v *XMLVisitor) VisitBigKey(key *doctor.BigKey) error {
 	return v.visit(&t)
 }
 
+func (v *XMLVisitor) VisitHotKey(key *doctor.HotKey) error {
+	t := struct {
+		*doctor.HotKey
+		XMLName struct{} `xml:"hotkey"`
+	}{HotKey: key}
+
+	return v.visit(&t)
+}
+
 func (v *XMLVisitor) VisitSlowLog(log *doctor.SlowLog) error {
 	t := struct {
 		*doctor.SlowLog

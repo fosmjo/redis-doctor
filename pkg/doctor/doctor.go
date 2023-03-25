@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/redis/go-redis/v9"
 
@@ -20,6 +21,7 @@ type Options struct {
 	Type        string
 	Length      int64
 	Cardinality int64
+	Frequency   int64
 	Batch       int
 	Limit       int
 }
@@ -37,6 +39,8 @@ func (d *Doctor) Diagnose(ctx context.Context, symptom string, opts Options) err
 		return d.slowlog(ctx, opts.Limit)
 	case "bigkey":
 		return d.bigkey(ctx, opts)
+	case "hotkey":
+		return d.hotkey(ctx, opts)
 	default:
 		return errors.New("unknown symptom")
 	}
@@ -75,6 +79,7 @@ func (d *Doctor) bigkey(ctx context.Context, opts Options) error {
 		if len(keys) == 0 {
 			break
 		}
+
 		if len(keys) > opts.Limit-count {
 			keys = keys[:opts.Limit-count]
 		}
@@ -114,6 +119,69 @@ func (d *Doctor) bigkey(ctx context.Context, opts Options) error {
 				Cardinality:      cards[i],
 			}
 			err = d.outputer.VisitBigKey(bk)
+			if err != nil {
+				return err
+			}
+
+			count++
+		}
+	}
+
+	return nil
+}
+
+func (d *Doctor) hotkey(ctx context.Context, opts Options) error {
+	ok, err := d.isLFUMaxmemoryPolicy(ctx)
+	if err != nil {
+		return err
+	}
+
+	if !ok {
+		return errors.New("the maxmemory-policy configuration is not set to one of the LFU policies")
+	}
+
+	keys := make([]string, 0, opts.Batch)
+	types := make([]string, 0, opts.Batch)
+	freqs := make([]int64, 0, opts.Batch)
+
+	iterator := d.iterator(ctx, opts.Pattern, opts.Batch, opts.Type)
+
+	for count := 0; count < opts.Limit; {
+		keys, err := d.keys(ctx, iterator, opts.Batch, keys[:0])
+		if err != nil {
+			return err
+		}
+
+		if len(keys) == 0 {
+			break
+		}
+
+		if len(keys) > opts.Limit-count {
+			keys = keys[:opts.Limit-count]
+		}
+
+		types, err = d.types(ctx, keys, opts.Type, types[:0])
+		if err != nil {
+			return err
+		}
+
+		freqs, err = d.objectFreq(ctx, keys, freqs[:0])
+		if err != nil {
+			return err
+		}
+
+		for i := range keys {
+			isHotKey := freqs[i] >= opts.Frequency
+			if !isHotKey {
+				continue
+			}
+
+			hk := &HotKey{
+				Key:       keys[i],
+				Type:      types[i],
+				Frequency: freqs[i],
+			}
+			err = d.outputer.VisitHotKey(hk)
 			if err != nil {
 				return err
 			}
@@ -258,6 +326,50 @@ func (d *Doctor) debugObject(
 	}
 
 	return results, nil
+}
+
+func (d *Doctor) objectFreq(ctx context.Context, keys []string, freqs []int64) ([]int64, error) {
+	cmds, err := d.client.Pipelined(
+		ctx,
+		func(pipe redis.Pipeliner) error {
+			for _, key := range keys {
+				pipe.Do(ctx, "OBJECT", "FREQ", key)
+			}
+			return nil
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, cmd := range cmds {
+		val, err := cmd.(*redis.Cmd).Int64() // nolint: forcetypeassert
+		if err != nil {
+			return nil, err
+		}
+
+		freqs = append(freqs, val)
+	}
+
+	return freqs, nil
+}
+
+func (d *Doctor) isLFUMaxmemoryPolicy(ctx context.Context) (bool, error) {
+	policy, err := d.configGet(ctx, "maxmemory-policy")
+	if err != nil {
+		return false, err
+	}
+
+	return strings.HasSuffix(policy, "-lfu"), nil
+}
+
+func (d *Doctor) configGet(ctx context.Context, key string) (string, error) {
+	cmd := d.client.ConfigGet(ctx, key)
+	if cmd.Err() != nil {
+		return "", cmd.Err()
+	}
+
+	return cmd.Val()[key], nil
 }
 
 func isBigKey(value, threshold int64) bool {

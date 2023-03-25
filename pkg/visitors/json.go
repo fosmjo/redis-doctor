@@ -21,6 +21,10 @@ func (v *JSONVisitor) VisitBigKey(key *doctor.BigKey) error {
 	return v.e.Encode(key)
 }
 
+func (v *JSONVisitor) VisitHotKey(key *doctor.HotKey) error {
+	return v.e.Encode(key)
+}
+
 func (v *JSONVisitor) VisitSlowLog(log *doctor.SlowLog) error {
 	return v.e.Encode(log)
 }

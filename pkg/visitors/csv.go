@@ -31,6 +31,15 @@ func (v *CSVVisitor) VisitBigKey(key *doctor.BigKey) error {
 	return v.w.Write(a)
 }
 
+func (v *CSVVisitor) VisitHotKey(key *doctor.HotKey) error {
+	a := []string{
+		key.Key,
+		key.Type,
+		strconv.FormatInt(key.Frequency, 10),
+	}
+	return v.w.Write(a)
+}
+
 func (v *CSVVisitor) VisitSlowLog(log *doctor.SlowLog) error {
 	a := []string{
 		strconv.FormatInt(log.ID, 10),
