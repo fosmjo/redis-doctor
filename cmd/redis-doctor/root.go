@@ -60,7 +60,7 @@ func (o *options) toRedisUniversalOPtions() *redis.UniversalOptions {
 	}
 }
 
-var _options = &options{}
+var _opts = &options{}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -69,7 +69,7 @@ var rootCmd = &cobra.Command{
 	Long:  `redis-doctor is a cli tool for diagnosing redis problems, such as hotkey, bigkey, slowlog, etc.`,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		var outputer doctor.Visitor
-		switch _options.format {
+		switch _opts.format {
 		case "json":
 			outputer = visitors.NewJSONVisitor(os.Stdout)
 		case "xml":
@@ -82,18 +82,18 @@ var rootCmd = &cobra.Command{
 			outputer = v
 		}
 
-		d := doctor.New(_options.toRedisUniversalOPtions(), outputer)
+		d := doctor.New(_opts.toRedisUniversalOPtions(), outputer)
 
 		return d.Diagnose(
 			context.Background(),
-			_options.symptom,
+			_opts.symptom,
 			doctor.Options{
-				Pattern:     _options.pattern,
-				Type:        _options._type,
-				Length:      _options.length,
-				Cardinality: _options.cardinality,
-				Batch:       _options.batch,
-				Limit:       _options.limit,
+				Pattern:     _opts.pattern,
+				Type:        _opts._type,
+				Length:      _opts.length,
+				Cardinality: _opts.cardinality,
+				Batch:       _opts.batch,
+				Limit:       _opts.limit,
 			},
 		)
 	},
@@ -109,13 +109,13 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&_options.host, "host", "", "127.0.0.1", "redis server host")
-	rootCmd.Flags().IntVarP(&_options.port, "port", "p", 6379, "redis server port")
-	rootCmd.Flags().IntVarP(&_options.db, "db", "n", 0, "redis database (default 0)")
-	rootCmd.Flags().StringVarP(&_options.user, "user", "u", "", "redis username")
-	rootCmd.Flags().StringVarP(&_options.password, "pass", "", "", "redis password")
+	rootCmd.Flags().StringVarP(&_opts.host, "host", "", "127.0.0.1", "redis server host")
+	rootCmd.Flags().IntVarP(&_opts.port, "port", "p", 6379, "redis server port")
+	rootCmd.Flags().IntVarP(&_opts.db, "db", "n", 0, "redis database (default 0)")
+	rootCmd.Flags().StringVarP(&_opts.user, "user", "u", "", "redis username")
+	rootCmd.Flags().StringVarP(&_opts.password, "pass", "", "", "redis password")
 	rootCmd.Flags().StringVarP(
-		&_options.symptom, "symptom", "s", "",
+		&_opts.symptom, "symptom", "s", "",
 		"symptom to diagnose (required, oneof: bigkey, hotkey, slowlog)",
 	)
 	err := rootCmd.MarkFlagRequired("symptom")
@@ -123,25 +123,25 @@ func init() {
 		panic(err)
 	}
 	rootCmd.Flags().StringVarP(
-		&_options.pattern, "pattern", "", "*",
+		&_opts.pattern, "pattern", "", "*",
 		"keys pattern when using the --bigkeys or --hotkey options",
 	)
 	rootCmd.Flags().StringVarP(
-		&_options._type, "type", "t", "",
+		&_opts._type, "type", "t", "",
 		"redis data type (oneof: string, list, hash, set, zset)",
 	)
 	rootCmd.Flags().Int64VarP(
-		&_options.length, "length", "l", 0,
+		&_opts.length, "length", "l", 0,
 		"serialized length of a key, used to filter bigkey (default 0)",
 	)
 	rootCmd.Flags().Int64VarP(
-		&_options.cardinality, "cardinality", "c", 0,
+		&_opts.cardinality, "cardinality", "c", 0,
 		"the number of elements of a key, used to filter bigkey (default 0)",
 	)
-	rootCmd.Flags().IntVarP(&_options.batch, "batch", "b", 10, "the batch size when using the scan command")
-	rootCmd.Flags().IntVarP(&_options.limit, "limit", "", 10, "the number of returned entries")
+	rootCmd.Flags().IntVarP(&_opts.batch, "batch", "b", 10, "the batch size when using the scan command")
+	rootCmd.Flags().IntVarP(&_opts.limit, "limit", "", 10, "the number of returned entries")
 	rootCmd.Flags().StringVarP(
-		&_options.format, "format", "f", "csv",
+		&_opts.format, "format", "f", "csv",
 		"output format (oneof: csv, json, xml)",
 	)
 }
