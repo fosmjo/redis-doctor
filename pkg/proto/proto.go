@@ -7,8 +7,8 @@ import (
 )
 
 type DebugObjectResult struct {
-	RefCount         int64  `mapstructure:"refcount"`
 	Encoding         string `mapstructure:"encoding"`
+	RefCount         int64  `mapstructure:"refcount"`
 	SerializedLength int64  `mapstructure:"serializedlength"`
 	LRU              int64  `mapstructure:"lru"`
 	LRUSecondsIdle   int64  `mapstructure:"lru_seconds_idle"`

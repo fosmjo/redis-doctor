@@ -34,21 +34,21 @@ import (
 )
 
 type options struct {
+	user     string
+	password string
 	host     string
 	port     int
 	db       int
-	user     string
-	password string
 
 	symptom     string
 	pattern     string
 	_type       string
+	format      string
 	length      int64
 	cardinality int64
 	frequency   int64
 	batch       int
 	limit       int
-	format      string
 }
 
 func (o *options) toRedisUniversalOPtions() *redis.UniversalOptions {

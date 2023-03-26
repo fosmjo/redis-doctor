@@ -21,8 +21,8 @@ func NewXMLVisitor(w io.Writer) *XMLVisitor {
 
 func (v *XMLVisitor) VisitBigKey(key *doctor.BigKey) error {
 	t := struct {
-		*doctor.BigKey
 		XMLName struct{} `xml:"bigkey"`
+		*doctor.BigKey
 	}{BigKey: key}
 
 	return v.visit(&t)
@@ -30,8 +30,8 @@ func (v *XMLVisitor) VisitBigKey(key *doctor.BigKey) error {
 
 func (v *XMLVisitor) VisitHotKey(key *doctor.HotKey) error {
 	t := struct {
-		*doctor.HotKey
 		XMLName struct{} `xml:"hotkey"`
+		*doctor.HotKey
 	}{HotKey: key}
 
 	return v.visit(&t)
@@ -39,8 +39,8 @@ func (v *XMLVisitor) VisitHotKey(key *doctor.HotKey) error {
 
 func (v *XMLVisitor) VisitSlowLog(log *doctor.SlowLog) error {
 	t := struct {
-		*doctor.SlowLog
 		XMLName struct{} `xml:"slowlog"`
+		*doctor.SlowLog
 	}{SlowLog: log}
 
 	return v.visit(&t)
